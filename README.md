@@ -317,8 +317,35 @@ git push origin main
 
 ### Salida de consola (segunda ejecución)
 
-Pendiente de incorporar la salida real de la comprobación con JDK 21 en GitHub Actions.
-La verificación ejecuta `Main` dos veces sobre la misma base H2 y comprueba los contadores y el total de diez registros.
+Comprobación realizada el **20 de septiembre de 2026** en **GitHub Actions**, con **Temurin JDK 21** y una base H2 nueva al comenzar la primera ejecución. Se ejecutó `Main` dos veces en la misma carpeta contra la API real de DummyJSON.
+
+- Compilación: **correcta**.
+- Primera ejecución: **8 insertados y 2 actualizados**.
+- Segunda ejecución: **0 insertados y 10 actualizados**.
+- Total comprobado mediante SQL al terminar: **10 productos**.
+
+[Ver ejecución automatizada](https://github.com/Fernand503/ClienteInventario-P2-2700882025/actions/runs/35520834854) · [Salida completa de la segunda ejecución](docs/evidencia/segunda-ejecucion.txt)
+
+Extracto de la salida real:
+
+```text
+Sincronizacion con la API -> insertados: 0 | actualizados: 10
+
+--- Inventario sincronizado ---
+ID    PRODUCTO                              CANTIDAD
+1     Essence Mascara Lash Princess               99
+2     Eyeshadow Palette with Mirror               34
+3     Powder Canister                             89
+4     Red Lipstick                                91
+5     Red Nail Polish                             79
+6     Calvin Klein CK One                         29
+7     Chanel Coco Noir Eau De                     58
+8     Dior J'adore                                98
+9     Dolce Shine Eau de                           4
+10    Gucci Bloom Eau de                          91
+```
+
+Los nombres y las existencias corresponden a la respuesta recibida durante esta comprobación y pueden cambiar en el proveedor.
 
 ### Uso de inteligencia artificial
 
