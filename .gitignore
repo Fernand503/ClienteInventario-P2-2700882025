@@ -1,0 +1,23 @@
+target/
+*.class
+*.mv.db
+*.trace.db
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.classpath
+.project
+.settings/
+
+### VS Code ###
+.vscode/
+
+.DS_Store
+
+# Respaldo local generado al ejecutar Main
+inventario.json

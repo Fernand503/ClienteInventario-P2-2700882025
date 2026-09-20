@@ -2,7 +2,7 @@
 
 Proyecto base de **Programación III (PROG3)** · Universidad Tecnológica de El Salvador · Facultad de Informática y Ciencias Aplicadas · Ciclo 02-2026.
 
-Cliente de inventario en Java que guarda productos en una base de datos **H2** mediante **JDBC** y respalda el inventario en **JSON** con **Jackson**. En el **Examen Parcial 2** usted agregará el consumo de una **API REST externa**.
+Cliente de inventario en Java que guarda productos en una base de datos **H2** mediante **JDBC** y respalda el inventario en **JSON** con **Jackson**. Integra el catálogo de una **API REST externa** y sincroniza los productos sin duplicar sus identificadores.
 
 ---
 
@@ -14,7 +14,10 @@ Cliente de inventario en Java que guarda productos en una base de datos **H2** m
 | `datos` | `ConexionDB` | Abre la conexión JDBC con H2 (`jdbc:h2:./inventario`) |
 | `datos` | `ProductoDAO` | CRUD con `PreparedStatement`: crear tabla, insertar, listar, actualizar, eliminar, existe |
 | `servicio` | `InventarioJsonService` | Exporta e importa el inventario en `inventario.json` con `ObjectMapper` |
-| raíz | `Main` | Coordina el flujo: crea la tabla, siembra datos, respalda, modifica y restaura |
+| `api` | `ProductoApi` y `RespuestaProductos` | Reciben el JSON del proveedor y convierten sus campos al modelo local |
+| `api` | `ProveedorAPI` | Consulta DummyJSON por HTTP y valida la respuesta |
+| `servicio` | `SincronizacionService` | Inserta o actualiza cada producto según su ID |
+| raíz | `Main` | Coordina el respaldo, la restauración y la sincronización con la API |
 | raíz | `PruebaJackson` | Clase de práctica de la guía N.º 2 (no forma parte del entregable) |
 
 ```
@@ -25,6 +28,10 @@ src/main/java/sv/edu/utec/
 |-- datos/ConexionDB.java
 |-- datos/ProductoDAO.java
 |-- servicio/InventarioJsonService.java
+|-- servicio/SincronizacionService.java
+|-- api/ProductoApi.java
+|-- api/RespuestaProductos.java
+|-- api/ProveedorAPI.java
 ```
 
 **Dependencias** (`pom.xml`): `com.h2database:h2:2.2.224` y `com.fasterxml.jackson.core:jackson-databind:2.17.2`.
@@ -33,7 +40,17 @@ src/main/java/sv/edu/utec/
 
 1. Abra la carpeta del proyecto en IntelliJ IDEA (**File › Open**) y pulse **Load Maven Changes**.
 2. Verifique que el proyecto usa **JDK 21** (**File › Project Structure › Project SDK**).
-3. Ejecute `sv.edu.utec.Main`.
+3. Ejecute `sv.edu.utec.Main` dos veces desde la misma carpeta.
+
+También puede ejecutar desde la terminal, con Maven y JDK 21:
+
+```bash
+mvn clean compile
+mvn exec:java
+mvn exec:java
+```
+
+En IntelliJ, seleccione JDK 21 tanto en **Project SDK** como en **Maven › Runner › JRE**. `pom.xml` declara la versión de compilación; no instala ni selecciona por sí solo el JDK del IDE.
 
 La base de datos `inventario.mv.db` **no** se incluye en el repositorio: se crea sola la primera vez que se ejecuta `Main`. Si quiere empezar de cero, cierre IntelliJ Database (si la tiene conectada) y elimine ese archivo.
 
@@ -296,14 +313,44 @@ git push origin main
 
 ## Parcial 2 — Consumo de API
 
-**Nombre:** José Fernando Diaz Del Cid · **Carnet:** 2700882025
+**Nombre:** José Fernando Díaz Del Cid · **Carnet:** 2700882025
 
 ### Salida de consola (segunda ejecución)
 
+Comprobación realizada el **20 de septiembre de 2026** en **GitHub Actions**, con **Temurin JDK 21** y una base H2 nueva al comenzar la primera ejecución. Se ejecutó `Main` dos veces en la misma carpeta contra la API real de DummyJSON.
+
+- Compilación: **correcta**.
+- Primera ejecución: **8 insertados y 2 actualizados**.
+- Segunda ejecución: **0 insertados y 10 actualizados**.
+- Total comprobado mediante SQL al terminar: **10 productos**.
+
+[Ver ejecución automatizada](https://github.com/Fernand503/ClienteInventario-P2-2700882025/actions/runs/35520834854) · [Salida completa de la segunda ejecución](docs/evidencia/segunda-ejecucion.txt)
+
+Extracto de la salida real:
+
 ```text
 Sincronizacion con la API -> insertados: 0 | actualizados: 10
+
+--- Inventario sincronizado ---
+ID    PRODUCTO                              CANTIDAD
+1     Essence Mascara Lash Princess               99
+2     Eyeshadow Palette with Mirror               34
+3     Powder Canister                             89
+4     Red Lipstick                                91
+5     Red Nail Polish                             79
+6     Calvin Klein CK One                         29
+7     Chanel Coco Noir Eau De                     58
+8     Dior J'adore                                98
+9     Dolce Shine Eau de                           4
+10    Gucci Bloom Eau de                          91
 ```
+
+Los nombres y las existencias corresponden a la respuesta recibida durante esta comprobación y pueden cambiar en el proveedor.
 
 ### Uso de inteligencia artificial
 
-Utilicé ChatGPT como apoyo para revisar la estructura del cliente HTTP, comprender la conversión de datos JSON y verificar la sincronización idempotente. Revisé, probé y comprendí el código implementado.
+Para esta versión se tomó como punto de partida el proyecto compartido por un compañero. Se utilizó ChatGPT/Codex para revisar el código contra la guía, corregir la publicación de los archivos en GitHub, configurar Maven con JDK 21, mejorar el manejo de errores del cliente HTTP y preparar la comprobación automatizada de idempotencia. Las comprobaciones automatizadas corresponden al entorno de GitHub Actions.
+
+### Corrección de la publicación
+
+La carga inicial contenía el README y una referencia Git a `ClienteInventario-P2`, sin los archivos Java disponibles en el repositorio. Se recuperó el código del ZIP en `src/main/java` y `pom.xml` en la raíz. Las correcciones se registran en la rama `feat/consumo-api` conservando los commits iniciales y las fechas reales.

@@ -1,0 +1,42 @@
+name: Verificar Java 21 e idempotencia
+
+on:
+  push:
+    branches: [main, feat/consumo-api]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/workflows/verificar.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Compilar con Java 21
+        run: mvn --batch-mode --no-transfer-progress clean compile org.apache.maven.plugins:maven-dependency-plugin:3.7.0:build-classpath -Dmdep.outputFile=target/classpath.txt
+      - name: Ejecutar Main dos veces y comprobar idempotencia
+        shell: bash
+        run: |
+          set -euo pipefail
+          project_classpath="target/classes:$(cat target/classpath.txt)"
+          java -cp "$project_classpath" sv.edu.utec.Main | tee target/primera-ejecucion.txt
+          grep -Fx 'Sincronizacion con la API -> insertados: 8 | actualizados: 2' target/primera-ejecucion.txt
+          echo 'INICIO_SEGUNDA_EJECUCION'
+          java -cp "$project_classpath" sv.edu.utec.Main | tee target/segunda-ejecucion.txt
+          echo 'FIN_SEGUNDA_EJECUCION'
+          grep -Fx 'Sincronizacion con la API -> insertados: 0 | actualizados: 10' target/segunda-ejecucion.txt
+          java -cp "$project_classpath" org.h2.tools.Shell -url jdbc:h2:./inventario -user sa -password '' -sql 'SELECT COUNT(*) AS TOTAL FROM producto;' | tee target/total.txt
+          grep -Ex '10[[:space:]]*' target/total.txt
