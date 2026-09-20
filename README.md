@@ -350,7 +350,3 @@ Los nombres y las existencias corresponden a la respuesta recibida durante esta 
 ### Uso de inteligencia artificial
 
 Para esta versión se tomó como punto de partida el proyecto compartido por un compañero. Se utilizó ChatGPT/Codex para revisar el código contra la guía, corregir la publicación de los archivos en GitHub, configurar Maven con JDK 21, mejorar el manejo de errores del cliente HTTP y preparar la comprobación automatizada de idempotencia. Las comprobaciones automatizadas corresponden al entorno de GitHub Actions.
-
-### Corrección de la publicación
-
-La carga inicial contenía el README y una referencia Git a `ClienteInventario-P2`, sin los archivos Java disponibles en el repositorio. Se recuperó el código del ZIP en `src/main/java` y `pom.xml` en la raíz. Las correcciones se registran en la rama `feat/consumo-api` conservando los commits iniciales y las fechas reales.
