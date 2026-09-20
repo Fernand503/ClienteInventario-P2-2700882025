@@ -296,7 +296,7 @@ git push origin main
 
 ## Parcial 2 — Consumo de API
 
-**Nombre:** Escriba aquí su nombre completo · **Carnet:** 2519942023
+**Nombre:** José Fernando Diaz Del Cid · **Carnet:** 2700882025
 
 ### Salida de consola (segunda ejecución)
 
